@@ -1,10 +1,10 @@
+//* GET ALL BOOKS
 function loadBooks() {
     $.ajax({
         url: '/controllers/get_books.php',
         method: 'GET',
         success: function(response) {
-
-            const res = JSON.parse(response)
+            const res = JSON.parse(response);
             let rows = '';
             res.forEach(function(book) {
                 rows += `
@@ -37,7 +37,6 @@ function loadBooks() {
                 </tr>
             `;
             });
-
             $('table tbody').html(rows);
         },
         error: function() {
@@ -46,108 +45,103 @@ function loadBooks() {
     });
 }
 
-
-
 $(document).ready(function() {
     loadBooks();
 
-    $(document).ready(function() {
-        loadBooks();
+    //* ADD & UPDATE MODAL
+    $('#exampleModal').on('show.bs.modal', function(event) {
+        const button = $(event.relatedTarget);
+        const modal = $(this);
 
-        $('#exampleModal').on('show.bs.modal', function(event) {
-            const button = $(event.relatedTarget);
-            const modal = $(this);
+        if (button.hasClass('edit-btn')) {
+            modal.find('#modalTitle').text('Edit Book');
+            modal.find('#book-id').val(button.data('id'));
+            modal.find('#book').val(button.data('title'));
+            modal.find('#isbn').val(button.data('isbn'));
+            modal.find('#author').val(button.data('author'));
+            modal.find('#publisher').val(button.data('publisher'));
+            modal.find('#year-published').val(button.data('year'));
+            modal.find('#category').val(button.data('category'));
+        } else {
+            modal.find('#modalTitle').text('Add Book');
+            modal.find('#book-id').val('');
+            modal.find('input').val('');
+        }
+    });
 
-            if (button.hasClass('edit-btn')) {
-                modal.find('#modalTitle').text('Edit Book');
-                modal.find('#book-id').val(button.data('id'));
-                modal.find('#book').val(button.data('title'));
-                modal.find('#isbn').val(button.data('isbn'));
-                modal.find('#author').val(button.data('author'));
-                modal.find('#publisher').val(button.data('publisher'));
-                modal.find('#year-published').val(button.data('year'));
-                modal.find('#category').val(button.data('category'));
-            } else {
-                modal.find('#modalTitle').text('Add Book');
-                modal.find('#book-id').val('');
-                modal.find('input').val('');
-            }
-        });
+    //* HANDLE CLICK SAVE BOOK
+    $('#save-book').on('click', function() {
+        const id = $('#book-id').val();
+        const title = $('#book').val();
+        const isbn = $('#isbn').val();
+        const author = $('#author').val();
+        const publisher = $('#publisher').val();
+        const year_published = $('#year-published').val();
+        const category = $('#category').val();
 
-        $('#save-book').on('click', function() {
-            const id = $('#book-id').val();
-            const title = $('#book').val();
-            const isbn = $('#isbn').val();
-            const author = $('#author').val();
-            const publisher = $('#publisher').val();
-            const year_published = $('#year-published').val();
-            const category = $('#category').val();
+        const url = id ? '/controllers/update_book.php' : '/controllers/add_book.php';
 
-            const url = id ? '/controllers/update_book.php' : '/controllers/add_book.php';
-
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: {
-                    id,
-                    title,
-                    isbn,
-                    author,
-                    publisher,
-                    year_published,
-                    category
-                },
-                success: function(response) {
-                    const result = JSON.parse(response);
-                    if (result.status === 'success') {
-                        $('#exampleModal').modal('hide');
-                        loadBooks();
-                    } else {
-                        alert(result.message);
-                    }
-                },
-                error: function() {
-                    alert('An error occurred.');
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: {
+                id,
+                title,
+                isbn,
+                author,
+                publisher,
+                year_published,
+                category
+            },
+            success: function(response) {
+                const result = JSON.parse(response);
+                if (result.status === 'success') {
+                    $('#exampleModal').modal('hide');
+                    loadBooks();
+                } else {
+                    alert(result.message);
                 }
-            });
+            },
+            error: function() {
+                alert('An error occurred.');
+            }
         });
     });
-});
 
+    //* HANDLE DELETE BOOK
+    $(document).on('click', '.delete-btn', function() {
+        const id = $(this).data('id');
+        const title = $(this).data('title');
 
-//* DELETE SHOW MODAL
-$(document).on('click', '.delete-btn', function() {
-    const id = $(this).data('id');
-    const title = $(this).data('title');
+        $('#delete-book-title').text(title);
+        $('#delete-book-id').val(id);
 
-    $('#delete-book-title').text(title);
-    $('#delete-book-id').val(id);
+        $('#deleteModal').modal('show');
+    });
 
-    $('#deleteModal').modal('show');
-});
+    //* HANDLE CLICK DELETE BOOK
+    $('#confirm-delete').on('click', function() {
+        const id = $('#delete-book-id').val();
 
-//* CONFIRM DELETE
-$('#confirm-delete').on('click', function() {
-    const id = $('#delete-book-id').val();
-
-    $.ajax({
-        url: '/controllers/delete_book.php',
-        type: 'POST',
-        data: {
-            id: id
-        },
-        success: function(response) {
-            const result = JSON.parse(response);
-            if (result.status === 'success') {
-                $('#deleteModal').modal('hide');
-                loadBooks();
-                alert('Book deleted successfully!');
-            } else {
-                alert('Failed to delete the book.');
+        $.ajax({
+            url: '/controllers/delete_book.php',
+            type: 'POST',
+            data: {
+                id: id
+            },
+            success: function(response) {
+                const result = JSON.parse(response);
+                if (result.status === 'success') {
+                    $('#deleteModal').modal('hide');
+                    loadBooks();
+                    alert('Book deleted successfully!');
+                } else {
+                    alert('Failed to delete the book.');
+                }
+            },
+            error: function() {
+                alert('An error occurred during deletion.');
             }
-        },
-        error: function() {
-            alert('An error occurred during deletion.');
-        }
+        });
     });
 });
