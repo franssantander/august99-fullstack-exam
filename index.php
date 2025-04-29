@@ -12,9 +12,11 @@
 <body>
     <div class="container mt-5">
         <!-- Button Modal -->
-        <button type="button" class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#exampleModal">
-            Add Book
-        </button>
+        <div class="d-flex justify-content-end">
+            <button type="button" class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                Add Book
+            </button>
+        </div>
 
         <!-- ADD & EDIT MODAL -->
         <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
